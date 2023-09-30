@@ -1,23 +1,21 @@
 import logo from './logo.svg';
 import './App.css';
+import { BrowserRouter } from "react-router-dom";
+import { Context } from "./context/ContextHelper";
+import { BrowserRouter } from "react-router-dom";
+import RoutesForCustomer from "./routes/customer"
+
+
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+  return (    
+    <div>
+      <BrowserRouter basename="/">
+        <Context.Provider value="Nguyen Van E">
+          <NavBar></NavBar>
+          <RoutesForCustomer> </RoutesForCustomer>
+        </Context.Provider>
+      </BrowserRouter>
     </div>
   );
 }
