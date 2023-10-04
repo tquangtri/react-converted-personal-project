@@ -12,6 +12,6 @@ class CartAction{
         }
     }
 
-}
+} 
 
 export default CartAction;
