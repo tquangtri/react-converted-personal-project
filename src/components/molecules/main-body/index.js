@@ -5,7 +5,7 @@ import Category from "../../atoms/Category";
 
 export default function MainBody() {
     const [showingCategs, setShowingCategs] = useState([]);
-
+    
     useEffect(() => {
         let allCategs = FakeData.fakeProductCategories;
 

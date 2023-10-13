@@ -655,7 +655,7 @@ export class FakeDataGenerator {
                     "zk1y3a95.jpg",
                     "fjqutqr4.jpg",
                     "sz2n5h9g.jpg",
-                    "oor1l4aw.png",
+                    "oor1l4aw.jpg",
                     "oj1oszi6.jpg",
                     "spd8hwt3.jpg",
                     "kj4gwcsc.jpg",
@@ -2560,5 +2560,30 @@ FakeData.fakeUserCart = fixUpId(FakeData.fakeUserCart);
 FakeData.fakeProductCategories = fixUpId(FakeData.fakeProductCategories);
 FakeData.fakeAuthors = fixUpId(FakeData.fakeAuthors);
 FakeData.fakeProductDetailInfos = fixUpId(FakeData.fakeProductDetailInfos);
+
+
+/***
+ * React only allow loading static image with 'require',
+ * mean while 'require' require everything to be statically loaded before any rendering occurrs
+ * so we cannot pass a variable with image name and its path as params into 'require(..)' in each React Component
+ * 
+ * This function help convert every img link of productInfo to actual img resource
+ * This works only on preloaded, wont work if you call this function while app is running
+ */
+let changeImgSrcToImgResource = (arrayOfProduct) => {
+    
+    arrayOfProduct.forEach(prod => {
+        let tempImgs = [];
+        prod.imgs.forEach(
+            each => {
+                tempImgs.push(require('./../asset/image/productImage/' + each));
+            }
+        )
+        prod.imgs = tempImgs; 
+    });
+    return arrayOfProduct;
+}
+FakeData.fakeProductDetailInfos = changeImgSrcToImgResource(FakeData.fakeProductDetailInfos);
+
 
 export default FakeData;

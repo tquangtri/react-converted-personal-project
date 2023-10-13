@@ -1,5 +1,5 @@
 import md5 from "md5";
-import { salt, key_currentUser, key_cart, key_usersDB } from "./constants";
+import { salt, key_currentUser, key_usersDB, passwordRegex } from "./constants";
 import FakeData from "./FakeData";
 
 
@@ -18,7 +18,7 @@ let save = (key, content) => {
     localStorage.setItem(key, toJson(content));
 }
 
-let load = (key) => {
+export let load = (key) => {
     return fromJson(localStorage.getItem(key));
 }
 
@@ -30,10 +30,6 @@ let removeFromStorage = (key) => {
 let getCurrentUser = () => {
     return load(key_currentUser);
 }
-let hadLoggedIn = () => {
-    return load(key_currentUser) != null;
-}
-
 let isUndefined = (someVar) => {
     return typeof someVar === 'undefined';
 }
@@ -100,8 +96,10 @@ class AccountUtil {
         }
         return userDB[id];
     }
-    static userFrom(inputEmail, hashedInputPassword) {
-        return { email: inputEmail, password: hashedInputPassword }
+    static createUserFrom(inputEmail, hashedInputPassword) {
+        let userDB = load(key_usersDB);
+        let nextId = (userDB) ? userDB.length : 0;
+        return {id: nextId, email: inputEmail, password: hashedInputPassword }
     }
     static addUser(user) {
         let userDB = this.selectAll();
@@ -122,104 +120,6 @@ class AccountUtil {
         return userDB[foundUser.id];
     }
 }
-
-class CartUtil {
-    static selectAll() {
-        let cartDB = load(key_cart);
-        return cartDB;
-    }
-    static select(id) {
-        let cartDB = load(key_cart);
-
-        if (id < 0 || id >= cartDB.length) {
-            return null;
-        }
-        return cartDB[id];
-    }
-
-    static create() {
-        let cartDB = load(key_cart);
-        let nextId = cartDB.length;
-        let newCart = {
-            id: nextId,
-            cartItems: [
-            ]
-        }
-        cartDB.push(newCart);
-
-        save(key_cart, cartDB);
-        return newCart;
-    }
-
-    static addToCart(cart, product) {
-        let accepted = false;
-        if (!cart) return accepted;
-
-        if (!Array.isArray(product)) {
-            product = [product];
-        }
-        product.forEach(
-            eachProduct => {
-                let cartItem = CartUtil.findCartItemWithProduct(eachProduct, cart);
-                //console.log('findCartItemWithProduct', product, cart, "cartItem", cartItem);
-                if (cartItem) {
-                    accepted = false;
-                    //do nothing, no such thing as purchasing a single 3d-product multiple times                 
-                }
-                else {
-                    cart.cartItems.push(
-                        {
-                            productId: eachProduct.id,
-                        }
-                    );
-                    accepted = true;
-                }
-            }
-        )
-
-        this.saveCart(cart);
-        return accepted;
-    }
-    static findCartItemWithProduct(product, cart) {
-        if (!cart || !product) return null;
-        if (!('cartItems' in cart)) return null;
-        if (!(cart.cartItems) || cart.cartItems.length === 0) return null;
-
-        let foundCartItem = null;
-        cart.cartItems.every(
-            eachCartItem => {
-                if (!('productId' in eachCartItem)) {
-                    return true; //continue loop
-                }
-                else if (eachCartItem.productId === product.id) {
-                    foundCartItem = eachCartItem;
-                    return false; // break loop
-                }
-                return true;
-            }
-        )
-        return foundCartItem;
-    }
-    static saveCart(cart) {
-        let cartDB = load(key_cart);
-
-        if (cartDB.length <= cart.id) {
-            return false;
-        }
-
-        cartDB[cart.id] = cart;
-        save(key_cart, cartDB);
-    }
-
-    static removeItemFromCart(cartItem, cartId) {
-        let foundCart = this.select(cartId);
-        if (foundCart) {
-            ArrayUtil.removeItemFrom(cartItem, foundCart.cartItems);
-        }
-        this.saveCart(foundCart);
-    }
-}
-
 
 class AuthorUtil {
     static select(id) {
@@ -286,10 +186,51 @@ class ArrayUtil {
     }
 }
 
+export class AuthenResult {
+    invalidEmail = false;
+    invalidPassword = false;
+    accountExisted = false;
+
+    isInvalidInput = () => {
+        return this.invalidEmail
+            || this.invalidPassword;
+    }
+    isSignupPassed = () => {
+        return !this.isInvalidInput()
+            && !this.accountExisted;
+    }
+    isLoginPassed = () => {
+        return !this.isInvalidInput()
+            && this.accountExisted;
+    }
+}
+
+export let matchRegexPassword = (target) => {
+    return target.toString().match(passwordRegex) != null;
+}
+
+let reloadPage = () => {
+    window.location.reload();
+}
+
+/***
+ * @returns {boolean}
+ */
+let isFunction = (any) => {
+    let tryCheck = any && {}.toString.call(any) === '[object Function]';
+
+    //tryCheck can be 'undefined' yet we only want to return a boolean
+    if (!tryCheck) {
+        return false;
+    }
+    return true;
+}
+
 export {
     hash, arrayFromHTMLCollection, cloneDOM,
-    convertToDate, fromJson, getCurrentUser, hadLoggedIn,
+    convertToDate, fromJson, getCurrentUser,
     removeFromStorage, save, toJson,
-    fixUpId, AccountUtil, ArrayUtil, AuthorUtil, CartUtil, ProductUtil, StringUtil,
-    isUndefined
+    fixUpId, AccountUtil, ArrayUtil, AuthorUtil, ProductUtil, StringUtil,
+    isUndefined, isFunction,
+    reloadPage
 }

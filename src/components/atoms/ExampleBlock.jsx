@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 
 export default function ExampleBlock(props) {
-  let pathToProductImage = "asset/image/productImage/";
-
   const {detailedProduct} = props;
 
   const [productFileFormats, setProductFileFormats] = useState("");
@@ -27,11 +25,11 @@ export default function ExampleBlock(props) {
     <div className="example-block">
       <input type="text" className="product-id" hidden defaultValue="-1" />
       <div className="content-wrapper">
-        <a href="/" className="link">
+        <a href={"/product-detail/"+ detailedProduct.id} className="link">
           <img
             alt=""
             className="item-img product-bigimg"
-            src={pathToProductImage + detailedProduct.imgs[0]}
+            src={detailedProduct.imgs[0]}
           />
         </a>
       </div>

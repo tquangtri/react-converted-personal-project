@@ -10,7 +10,8 @@ function App() {
     <div>
       <BrowserRouter basename="/">
         <Context.Provider value="Nguyen Van E">
-          <RoutesForCustomer> </RoutesForCustomer>
+          <RoutesForCustomer>
+          </RoutesForCustomer>
         </Context.Provider>
       </BrowserRouter>
     </div>
